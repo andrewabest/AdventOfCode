@@ -31,7 +31,7 @@ public class Day5
         Assert.Equal(0, results.Min());
     }
 
-    public class Range(long inputStart, long outputStart, long span)
+    public class Range(long outputStart, long inputStart, long span)
     {
         public bool HasInput(long input) => input >= inputStart && input < inputStart + span;
 
