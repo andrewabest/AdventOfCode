@@ -7,7 +7,7 @@ public class Day3
     [Fact]
     public void Works()
     {
-        Assert.Equal(498726, Main(actualInput));
+        Assert.Equal(524673, Main(actualInput));
     }
     
     [Theory]
@@ -73,8 +73,6 @@ public class Day3
         Assert.Equal(123, result);
     }
 
-    readonly char[] _symbols = { '*', '&', '$', '/', '=', '%', '#', '-', '+' };
-
     bool IsPartNumber(string previous, string current, string next, string candidate, int candidateIndex)
     {
         var hasLeft = candidateIndex > 0;
@@ -103,7 +101,9 @@ public class Day3
         if (hasPrevious) candidates.AddRange(previous[candidateIndex..(candidateIndex + candidate.Length)]);
         if (hasNext) candidates.AddRange(next[candidateIndex..(candidateIndex + candidate.Length)]);
 
-        return candidates.Any(_symbols.Contains);
+        bool IsSymbol(char c) => !char.IsDigit(c) && c != '.';
+        
+        return candidates.Any(IsSymbol);
     }
     
     int Main(string input)
@@ -137,7 +137,7 @@ public class Day3
                             line,
                             GetNextLine(i),
                             candidate,
-                            j - candidate.Length + 1))
+                            j - candidate.Length + 1)) // We are sitting on the last character of the candidate, so adjust the index
                     {
                         result += int.Parse(candidate);
                     }
@@ -146,14 +146,14 @@ public class Day3
                 }
                 
                 // We have advanced past a candidate, and are sitting on a symbol or delimiter. Evaluate the candidate.
-                else if ((_symbols.Contains(c) || c == '.') && !string.IsNullOrEmpty(candidate))
+                else if (!char.IsDigit(c) && !string.IsNullOrEmpty(candidate))
                 {
                     if (IsPartNumber(
                             GetPreviousLine(i),
                             line,
                             GetNextLine(i),
                             candidate,
-                            j - candidate.Length))
+                            j - candidate.Length)) // We have advanced past the candidate, no need to adjust the index
                     {
                         result += int.Parse(candidate);
                     }
