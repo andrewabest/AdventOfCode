@@ -4,6 +4,17 @@ namespace AdventOfCode2023;
 
 public class Day5
 {
+    [Theory]
+    [InlineData(0, 0, 1, 0, 0)]
+    [InlineData(0, 0, 2, 1, 1)]
+    public void GetOutputIsCorrect(long start, long end, long span, long input, long expectedOutput)
+    {
+        var range = new Range(start, end, span);
+        var output = range.GetOutput(input);
+
+        Assert.Equal(expectedOutput, output);
+    }
+
     [Fact]
     void Main()
     {
@@ -16,25 +27,28 @@ public class Day5
         };
 
         var results = inputs.Select(i => map.GetResult(i));
-        
+
         Assert.Equal(0, results.Min());
     }
 
     public class Range(long inputStart, long outputStart, long span)
     {
-        public long InputStart { get; } = inputStart;
-        public long OutputStart { get; } = outputStart;
-        public long Span { get; } = span;
+        public bool HasInput(long input) => input >= inputStart && input < inputStart + span;
 
-        public bool HasInput(long input) => input >= InputStart && input < InputStart + Span;
+        public long GetOutput(long input)
+        {
+            if (!HasInput(input))
+            {
+                throw new ArgumentOutOfRangeException(nameof(input));
+            }
 
-        public long GetOutput(long input) => OutputStart + (input - InputStart);
+            return outputStart + (input - inputStart);
+        }
     }
 
     public class Map(Map? next)
     {
-        private Map? _next = next;
-        private List<Range> _ranges = new();
+        private readonly List<Range> _ranges = new();
 
         public void AddRange(Range range) => _ranges.Add(range);
 
@@ -43,13 +57,13 @@ public class Day5
             var range = _ranges.FirstOrDefault(r => r.HasInput(input));
             var output = range?.GetOutput(input) ?? input;
 
-            return _next?.GetResult(output) ?? output;
+            return next?.GetResult(output) ?? output;
         }
     }
-    
-    public Map GenerateMap()
+
+    static Map GenerateMap()
     {
-        Map humidityToLocation = new Map(null);
+        var humidityToLocation = new Map(null);
         humidityToLocation.AddRange(new Range(3693038281, 1946208152, 169064741));
         humidityToLocation.AddRange(new Range(3025397429, 1673895501, 272312651));
         humidityToLocation.AddRange(new Range(2522027478, 1111558812, 503369951));
