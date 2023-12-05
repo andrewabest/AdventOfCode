@@ -7,7 +7,7 @@ public class Day3
     [Fact]
     public void Works()
     {
-        Assert.Equal(524673, Main(actualInput));
+        Assert.Equal(527446, Main(actualInput));
     }
     
     [Theory]
@@ -56,11 +56,23 @@ public class Day3
     {
         Assert.True(IsPartNumber(previous, current, next, candidate, candidateIndex));
     }
-
-    [Fact]
-    public void GetsCandidateAtEndOfLineCorrectly()
+    
+    [Theory]
+    [InlineData("*123....")]
+    [InlineData("123*....")]
+    public void GetsCandidateAtStartOfLineCorrectly(string candidate)
     {
-        var result = Main("....*123");
+        var result = Main(candidate);
+        
+        Assert.Equal(123, result);
+    }
+
+    [Theory]
+    [InlineData("....*123")]
+    [InlineData("....123*")]
+    public void GetsCandidateAtEndOfLineCorrectly(string candidate)
+    {
+        var result = Main(candidate);
         
         Assert.Equal(123, result);
     }
@@ -128,32 +140,19 @@ public class Day3
 
                 string GetPreviousLine(int index) => index > 0 ? lines[index - 1] : string.Empty;
                 string GetNextLine(int index) => index < lines.Length - 1 ? lines[index + 1] : string.Empty;
-
-                // We have reached the end of the line, and are sitting on a candidate. Evaluate it.
-                if (j == line.Length - 1 && !string.IsNullOrEmpty(candidate))
-                {
-                    if (IsPartNumber(
-                            GetPreviousLine(i),
-                            line,
-                            GetNextLine(i),
-                            candidate,
-                            j - candidate.Length + 1)) // We are sitting on the last character of the candidate, so adjust the index
-                    {
-                        result += int.Parse(candidate);
-                    }
-
-                    candidate = string.Empty;
-                }
                 
-                // We have advanced past a candidate, and are sitting on a symbol or delimiter. Evaluate the candidate.
-                else if (!char.IsDigit(c) && !string.IsNullOrEmpty(candidate))
+                if ((!char.IsDigit(c) || j == line.Length - 1) && !string.IsNullOrEmpty(candidate))
                 {
+                    // If we are sitting on the candidate at the end of the line, account for this in the index
+                    var candidateIndex = char.IsDigit(c) 
+                        ? j - candidate.Length + 1 : j - candidate.Length;
+                    
                     if (IsPartNumber(
                             GetPreviousLine(i),
                             line,
                             GetNextLine(i),
                             candidate,
-                            j - candidate.Length)) // We have advanced past the candidate, no need to adjust the index
+                            candidateIndex)) // We have advanced past the candidate, no need to adjust the index
                     {
                         result += int.Parse(candidate);
                     }
@@ -165,7 +164,6 @@ public class Day3
 
         return result;
     }
-
 
 // The engine schematic (your puzzle input) consists of a visual representation of the engine. 
 // There are lots of numbers and symbols you don't really understand, 
