@@ -7,7 +7,7 @@ public class Day3
     [Fact]
     public void Works()
     {
-        Assert.Equal(445234, Main(actualInput));
+        Assert.Equal(498726, Main(actualInput));
     }
     
     [Theory]
@@ -57,6 +57,22 @@ public class Day3
         Assert.True(IsPartNumber(previous, current, next, candidate, candidateIndex));
     }
 
+    [Fact]
+    public void GetsCandidateAtEndOfLineCorrectly()
+    {
+        var result = Main("....*123");
+        
+        Assert.Equal(123, result);
+    }
+    
+    [Fact]
+    public void EvaluatesWhenCandidateDelimitsAtASymbol()
+    {
+        var result = Main("....123*...");
+        
+        Assert.Equal(123, result);
+    }
+
     readonly char[] _symbols = { '*', '&', '$', '/', '=', '%', '#', '-', '+' };
 
     bool IsPartNumber(string previous, string current, string next, string candidate, int candidateIndex)
@@ -94,8 +110,6 @@ public class Day3
     {
         var lines = input.Split(Environment.NewLine);
 
-        
-
         var result = 0;
 
         for (int i = 0; i < lines.Length; i++)
@@ -112,17 +126,36 @@ public class Day3
                     candidate = $"{candidate}{c}";
                 }
 
-                // If we are reading a dot, or have reached the end of the line, and we have a candidate, evaluate it.
-                if ((c == '.' || j == line.Length - 1) && !string.IsNullOrEmpty(candidate))
+                string GetPreviousLine(int index) => index > 0 ? lines[index - 1] : string.Empty;
+                string GetNextLine(int index) => index < lines.Length - 1 ? lines[index + 1] : string.Empty;
+
+                // We have reached the end of the line, and are sitting on a candidate. Evaluate it.
+                if (j == line.Length - 1 && !string.IsNullOrEmpty(candidate))
                 {
                     if (IsPartNumber(
-                            i > 0 ? lines[i - 1] : string.Empty,
+                            GetPreviousLine(i),
                             line,
-                            i < lines.Length - 1 ? lines[i + 1] : string.Empty,
+                            GetNextLine(i),
+                            candidate,
+                            j - candidate.Length + 1))
+                    {
+                        result += int.Parse(candidate);
+                    }
+
+                    candidate = string.Empty;
+                }
+                
+                // We have advanced past a candidate, and are sitting on a symbol or delimiter. Evaluate the candidate.
+                else if ((_symbols.Contains(c) || c == '.') && !string.IsNullOrEmpty(candidate))
+                {
+                    if (IsPartNumber(
+                            GetPreviousLine(i),
+                            line,
+                            GetNextLine(i),
                             candidate,
                             j - candidate.Length))
                     {
-                        result += Int32.Parse(candidate);
+                        result += int.Parse(candidate);
                     }
 
                     candidate = string.Empty;
