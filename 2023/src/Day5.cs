@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System.Collections.Concurrent;
+using Xunit;
 
 namespace AdventOfCode2023;
 
@@ -29,6 +30,45 @@ public class Day5
         var results = inputs.Select(i => map.GetResult(i));
 
         Assert.Equal(0, results.Min());
+    }
+    
+    [Fact]
+    void Main2()
+    {
+        var map = GenerateMap();
+        var inputs = new (long, long)[]
+        {
+            (3121711159, 166491471), 
+            (3942191905, 154855415), 
+            (3423756552, 210503354), 
+            (2714499581, 312077252), 
+            (1371898531, 165242002), 
+            (752983293, 93023991), 
+            (3321707304, 21275084), 
+            (949929163, 233055973), 
+            (3626585, 170407229), 
+            (395618482, 226312891)
+        };
+
+        var lowestPerStack = new ConcurrentBag<long>();
+        
+        Parallel.ForEach(inputs, new ParallelOptions { MaxDegreeOfParallelism = inputs.Length }, tuple =>
+        {
+            long lowest = long.MaxValue;
+            for (long i = 0; i < tuple.Item2; i++)
+            {
+                var value = tuple.Item1 + i;
+                var result = map.GetResult(value);
+                if (result < lowest)
+                {
+                    lowest = result;
+                }
+            }
+
+            lowestPerStack.Add(lowest);
+        });
+
+        Assert.Equal(0, lowestPerStack.Min());
     }
 
     public class Range(long outputStart, long inputStart, long span)
