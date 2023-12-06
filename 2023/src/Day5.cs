@@ -29,7 +29,7 @@ public class Day5
 
         var results = inputs.Select(i => map.GetResult(i));
 
-        Assert.Equal(0, results.Min());
+        Assert.Equal(535088217, results.Min());
     }
     
     [Fact]
@@ -68,7 +68,7 @@ public class Day5
             lowestPerStack.Add(lowest);
         });
 
-        Assert.Equal(0, lowestPerStack.Min());
+        Assert.Equal(535088217, lowestPerStack.Min());
     }
 
     public class Range(long outputStart, long inputStart, long span)
